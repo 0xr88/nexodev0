@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>NexoDev | خدمات برمجية احترافية</title>
+
+  <!-- ===== ألوان / متغيرات جديدة مستوحاة من BlackDozer ===== -->
+  <style>
+    :root{
+      --bg-main:#0c0c0e;
+      --bg-card:#14161b;
+      --accent:#00e18e;
+      --accent-dark:#00c578;
+      --text-main:#e5e5e5;
+    }
+
+    /* ======== الأساسيات ======== */
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Poppins',Arial,sans-serif;
+      background:var(--bg-main);
+      color:var(--text-main);
+      user-select:none;
+      scroll-behavior:smooth;
+    }
+
+    /* ======== رأس الصفحة ======== */
+    header{
+      background:var(--bg-card);
+      padding:1rem 2rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      box-shadow:0 0 20px rgba(0,0,0,.6);
+      position:relative;
+    }
+    .logo{
+      font-size:1.8rem;
+      font-weight:700;
+      color:var(--accent);
+      letter-spacing:2px;
+    }
+
+    /* ======== أيقونة السلة ======== */
+    .cart-icon{
+      position:relative;
+      font-size:2rem;
+      cursor:pointer;
+      color:var(--accent);
+    }
+    .cart-icon .count{
+      position:absolute;top:-8px;left:-10px;
+      background:var(--accent);
+      color:var(--bg-main);
+      font-weight:700;
+      font-size:.85rem;
+      padding:2px 6px;
+      border-radius:50%;
+      min-width:20px;text-align:center;
+    }
+
+    /* ======== القائمة المنسدلة (يسار تحت الأيقونة) ======== */
+    #cartDropdown{
+      display:none;
+      position:absolute;
+      top:50px;
+      left:0;                /* <-- أهم تعديل */
+      width:320px;
+      max-height:320px;
+      background:var(--bg-card);
+      border-radius:10px;
+      box-shadow:0 0 18px rgba(0,225,142,.55);
+      overflow-y:auto;
+      padding:12px 16px;
+      z-index:2000;
+    }
+    #cartDropdown h4{
+      margin:0 0 10px;
+      font-weight:700;
+      border-bottom:2px solid var(--accent);
+      padding-bottom:4px;
+      text-align:center;
+      color:var(--accent);
+    }
+    #cartItems{list-style:none;padding:0;margin:0}
+    #cartItems li{
+      display:flex;align-items:center;justify-content:space-between;
+      background:var(--bg-main);
+      border-radius:8px;
+      padding:8px 10px;margin-bottom:8px;
+      font-weight:600;font-size:.95rem;
+      transition:background .25s;
+    }
+    #cartItems li:hover{background:#1e1f24}
+    #cartItems .item-info{display:flex;align-items:center;gap:8px;flex-grow:1}
+    #cartItems .item-info svg{width:24px;height:24px;fill:var(--accent)}
+    #cartItems .item-price{opacity:.8;font-size:.9rem}
+    #cartItems button.remove-btn{
+      background:none;border:none;color:#ff5252;font-size:1.4rem;
+      cursor:pointer;font-weight:700;padding:0 6px;
+    }
+
+    #cartTotal{
+      text-align:center;
+      font-weight:700;
+      margin-top:6px;
+      color:var(--accent);
+    }
+    #cartActions{text-align:center;margin-top:8px}
+    #cartActions button{
+      background:var(--accent);
+      border:none;
+      padding:.55rem 1.2rem;
+      margin:0 5px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--bg-main);
+      transition:background .25s;
+    }
+    #cartActions button:hover{background:var(--accent-dark)}
+
+    /* ======== بطاقات الخدمات ======== */
+    section.services{
+      max-width:1000px;
+      margin:3rem auto;
+      padding:2rem;
+      background:var(--bg-card);
+      border-radius:16px;
+      box-shadow:0 0 25px rgba(0,225,142,.35);
+    }
+    section.services h1{
+      text-align:center;margin-bottom:2rem;
+      color:var(--accent);
+      letter-spacing:1.5px;
+    }
+    .service{
+      background:var(--bg-main);
+      border-radius:14px;
+      padding:1rem 1.4rem;
+      margin-bottom:1.4rem;
+      display:flex;align-items:center;gap:14px;
+      transition:transform .25s,box-shadow .25s;
+    }
+    .service:hover{
+      transform:translateY(-4px);
+      box-shadow:0 8px 18px rgba(0,0,0,.6);
+    }
+    .service svg.icon{width:40px;height:40px;fill:var(--accent)}
+    .service h2{margin:0;font-size:1.25rem;font-weight:700}
+    .service p{margin:2px 0 0 0;font-size:.9rem;opacity:.8}
+    .service .price-tag{margin-top:4px;color:var(--accent);font-weight:700}
+    .service button.add-btn{
+      background:var(--accent);
+      color:var(--bg-main);
+      border:none;
+      font-weight:700;
+      padding:.45rem 1rem;
+      border-radius:8px;
+      cursor:pointer;
+      transition:background .25s;
+    }
+    .service button.add-btn:hover{background:var(--accent-dark)}
+
+    /* ======== قسم الطلب ======== */
+    #orderSection{
+      max-width:500px;
+      margin:3rem auto 5rem;
+      padding:2rem;
+      background:var(--bg-card);
+      border-radius:14px;
+      display:none;
+      box-shadow:0 0 25px rgba(0,225,142,.45);
+    }
+    #orderSection h2{text-align:center;color:var(--accent);margin-bottom:1rem}
+    #orderForm input,#orderForm textarea{
+      width:100%;padding:.7rem .9rem;margin-bottom:1rem;
+      border-radius:8px;border:none;font-size:1rem;
+    }
+    #orderForm input[type="submit"]{
+      background:var(--accent);color:var(--bg-main);font-weight:700;
+      cursor:pointer;transition:background .25s;
+    }
+    #orderForm input[type="submit"]:hover{background:var(--accent-dark)}
+
+    footer{text-align:center;padding:2rem 1rem;color:#888;font-size:.85rem}
+
+    /* ======== إشعار عائم ======== */
+    #notification{
+      position:fixed;top:14px;left:50%;transform:translateX(-50%);
+      background:var(--accent);color:var(--bg-main);
+      padding:1rem 1.4rem;border-radius:8px;font-weight:700;
+      box-shadow:0 0 20px var(--accent);opacity:0;pointer-events:none;
+      transition:opacity .35s;z-index:4000;
+    }
+    #notification.show{opacity:1;pointer-events:auto}
+  </style>
+</head>
+<body>
+
+  <!-- ================= رأس الصفحة ================= -->
+  <header>
+    <div class="logo">NexoDev</div>
+
+    <!-- أيقونة السلة -->
+    <div class="cart-icon" id="cartIcon" title="سلة المشتريات">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="30" height="30">
+        <path d="M7 18c-1.104 0-1.99.9-1.99 2s.886 2 1.99 2 2-.9 2-2-.896-2-2-2zm10 0c-1.104 0-1.99.9-1.99 2s.886 2 1.99 2 2-.9 2-2-.896-2-2-2zM4.616 14.4l1.672-8.4H19v2H6.612l-1.61 8.1-2.146-1.2-1.5 2.58 3.138 1.8 1.778-3.4z"/>
+      </svg>
+      <span class="count" id="cartCount">0</span>
+    </div>
+
+    <!-- القائمة المنسدلة -->
+    <div id="cartDropdown" role="region" aria-label="قائمة المشتريات">
+      <h4>سلة المشتريات</h4>
+      <ul id="cartItems"></ul>
+      <div id="cartTotal"></div>
+      <div id="cartActions">
+        <button id="buyBtn">شراء</button>
+        <button id="clearBtn">إفراغ</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= الخدمات ================= -->
+  <section class="services" aria-label="خدمات NexoDev">
+    <h1>خدماتنا</h1>
+
+    <!-- خدمة HTML -->
+    <div class="service">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 3h20l-1.7 18.4L12 21l-8.3 0L2 3zm15.4 6.6l-2.3.7v2.6h-2.6v-2.6l-2.3-.7-.4 1.8 3 1.1 3-1.1-.4-1.8z"/></svg>
+      <div class="details">
+        <h2>برمجة مواقع HTML</h2>
+        <p>تصميم مواقع سريعة ومتجاوبة</p>
+        <span class="price-tag">8000 دج</span>
+      </div>
+      <button class="add-btn" onclick="addToCart('برمجة مواقع HTML')">أضف</button>
+    </div>
+
+    <!-- خدمة Python -->
+    <div class="service">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.3-3.3 3v2H7v3h3v2c0 1.7-1.3 3-3 3h1.2c2 0 3.3-1.3 3.3-3v-2h2v-3h-2v-2c0-1.7 1.3-3 3-3h-1.2z"/></svg>
+      <div class="details">
+        <h2>برمجة تطبيقات Python</h2>
+        <p>تطبيقات مخصصة وواجهات رسومية</p>
+        <span class="price-tag">12000 دج</span>
+      </div>
+      <button class="add-btn" onclick="addToCart('برمجة تطبيقات Python')">أضف</button>
+    </div>
+
+    <!-- خدمة Lua -->
+    <div class="service">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8z"/></svg>
+      <div class="details">
+        <h2>برمجة Lua</h2>
+        <p>تطوير سكربتات وألعاب Roblox</p>
+        <span class="price-tag">6000 دج</span>
+      </div>
+      <button class="add-btn" onclick="addToCart('برمجة Lua')">أضف</button>
+    </div>
+
+    <!-- خدمة C++ -->
+    <div class="service">
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 4h10v2H7V4zm0 6h7v2H7v-2zm0 6h5v2H7v-2z"/></svg>
+      <div class="details">
+        <h2>برمجة C++</h2>
+        <p>برامج ونظم عالية الأداء</p>
+        <span class="price-tag">10000 دج</span>
+      </div>
+      <button class="add-btn" onclick="addToCart('برمجة C++')">أضف</button>
+    </div>
+  </section>
+
+  <!-- ================= نموذج الطلب ================= -->
+  <section id="orderSection" aria-label="نموذج طلب الخدمة">
+    <h2>تفاصيل الطلب</h2>
+    <form id="orderForm">
+      <input type="text" id="name" placeholder="الاسم الكامل" required />
+      <input type="email" id="email" placeholder="البريد الإلكتروني" required />
+      <textarea id="details" rows="4" placeholder="تفاصيل إضافية (اختياري)"></textarea>
+      <input type="submit" value="إرسال الطلب" />
+    </form>
+  </section>
+
+  <!-- إشعار -->
+  <div id="notification"></div>
+
+  <footer>جميع الحقوق محفوظة &copy; 2025 NexoDev</footer>
+
+  <!-- ================= سكربت ================= -->
+  <script>
+    /* ---------- عناصر DOM ---------- */
+    const cartIcon      = document.getElementById('cartIcon');
+    const cartDropdown  = document.getElementById('cartDropdown');
+    const cartCount     = document.getElementById('cartCount');
+    const cartItemsList = document.getElementById('cartItems');
+    const cartTotalElm  = document.getElementById('cartTotal');
+    const buyBtn        = document.getElementById('buyBtn');
+    const clearBtn      = document.getElementById('clearBtn');
+    const orderSection  = document.getElementById('orderSection');
+    const orderForm     = document.getElementById('orderForm');
+    const notification  = document.getElementById('notification');
+
+    /* ---------- بيانات الأسعار ---------- */
+    const prices = {
+      'برمجة مواقع HTML'     : 8000,
+      'برمجة تطبيقات Python' : 12000,
+      'برمجة Lua'            : 6000,
+      'برمجة C++'            : 10000
+    };
+
+    /* ---------- أيقونات للخدمات ---------- */
+    const icons = {
+      'برمجة مواقع HTML': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M2 3h20l-1.7 18.4L12 21l-8.3 0L2 3zm15.4 6.6l-2.3.7v2.6h-2.6v-2.6l-2.3-.7-.4 1.8 3 1.1 3-1.1-.4-1.8z"/></svg>`,
+      'برمجة تطبيقات Python': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2c-2 0-3.3 1.3-3.3 3v2H7v3h3v2c0 1.7-1.3 3-3 3h1.2c2 0 3.3-1.3 3.3-3v-2h2v-3h-2v-2c0-1.7 1.3-3 3-3h-1.2z"/></svg>`,
+      'برمجة Lua': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8z"/></svg>`,
+      'برمجة C++': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 4h10v2H7V4zm0 6h7v2H7v-2zm0 6h5v2H7v-2z"/></svg>`
+    };
+
+    /* ---------- بيانات السلة ---------- */
+    let cart = []; // كل عنصر: {name, price}
+
+    /* ========== دوال مساعدة ========== */
+    function formatPrice(p) { return p.toLocaleString('ar-DZ') + ' دج'; }
+
+    /* تحديث عداد السلة */
+    function updateCartCount(){
+      cartCount.textContent = cart.length;
+      cartCount.style.display = cart.length ? 'inline-block' : 'none';
+    }
+
+    /* حساب المجموع */
+    function calcTotal(){
+      return cart.reduce((sum,item)=>sum+item.price,0);
+    }
+
+    /* إعادة رسم القائمة */
+    function renderCart(){
+      cartItemsList.innerHTML='';
+      if(!cart.length){
+        cartItemsList.innerHTML='<li style="text-align:center;opacity:.7;">السلة فارغة</li>';
+        buyBtn.disabled=clearBtn.disabled=true;
+        cartTotalElm.textContent='';
+      }else{
+        buyBtn.disabled=clearBtn.disabled=false;
+        cart.forEach((item,idx)=>{
+          const li=document.createElement('li');
+          li.innerHTML=`
+            <div class="item-info">
+              ${icons[item.name]||''}
+              <span>${item.name}</span>
+            </div>
+            <span class="item-price">${formatPrice(item.price)}</span>
+            <button class="remove-btn" onclick="removeFromCart(${idx})">&times;</button>
+          `;
+          cartItemsList.appendChild(li);
+        });
+        cartTotalElm.textContent = 'المجموع: ' + formatPrice( calcTotal() );
+      }
+    }
+
+    /* إضافة عنصر */
+    function addToCart(name){
+      cart.push({name,price:prices[name]||0});
+      updateCartCount();renderCart();
+      showNotification(`أضيف "${name}" للسلة`);
+    }
+
+    /* إزالة عنصر */
+    function removeFromCart(idx){
+      cart.splice(idx,1);
+      updateCartCount();renderCart();
+    }
+
+    /* إفراغ */
+    clearBtn.onclick = ()=>{
+      cart=[];updateCartCount();renderCart();
+      hideOrderSection();
+      showNotification('تم إفراغ السلة');
+    };
+
+    /* فتح/إغلاق القائمة */
+    cartIcon.onclick = ()=>{
+      cartDropdown.style.display = cartDropdown.style.display==='block' ? 'none' : 'block';
+    };
+
+    /* زر الشراء */
+    buyBtn.onclick = ()=>{
+      if(!cart.length){alert('السلة فارغة');return;}
+      cartDropdown.style.display='none';
+      showOrderSection();
+    };
+
+    /* إظهار/إخفاء نموذج الطلب */
+    function showOrderSection(){orderSection.style.display='block';window.scrollTo({top:orderSection.offsetTop-60,behavior:'smooth'});}
+    function hideOrderSection(){orderSection.style.display='none';orderForm.reset();}
+
+    /* إرسال الطلب بالبريد (mailto) */
+    orderForm.onsubmit = e=>{
+      e.preventDefault();
+      const name  = orderForm.name.value.trim();
+      const email = orderForm.email.value.trim();
+      const det   = orderForm.details.value.trim();
+
+      if(!name||!email){alert('يرجى إدخال الاسم والبريد');return;}
+
+      const lines = cart.map(it=>`- ${it.name}: ${formatPrice(it.price)}`).join('%0D%0A');
+      const total = formatPrice( calcTotal() );
+      const body  =
+`الاسم: ${name}
+البريد: ${email}
+
+الخدمات المطلوبة:
+${lines}
+
+المجموع: ${total}
+
+تفاصيل إضافية:
+${det || '---'}
+`;
+      const mailto = `mailto:xmondherxx@gmail.com?subject=${encodeURIComponent('طلب جديد من NexoDev')}&body=${encodeURIComponent(body)}`;
+      window.open(mailto,'_blank');
+
+      showNotification('تم تجهيز بريد الطلب – يرجى الإرسال');
+      cart=[];updateCartCount();renderCart();hideOrderSection();
+    };
+
+    /* إشعارات */
+    function showNotification(msg){
+      notification.textContent = msg;
+      notification.classList.add('show');
+      setTimeout(()=>notification.classList.remove('show'),3500);
+    }
+
+    /* إغلاق السلة عند النقر خارجها */
+    window.addEventListener('click',e=>{
+      if(!cartIcon.contains(e.target) && !cartDropdown.contains(e.target))
+        cartDropdown.style.display='none';
+    });
+
+    /* بداية */
+    updateCartCount();renderCart();
+    window.addToCart   = addToCart;
+    window.removeFromCart = removeFromCart;
+  </script>
+</body>
+</html>
