@@ -2,6 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
+  <!-- جعل الموقع متجاوباً على جميع الأجهزة -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NexoDev | خدمات برمجية احترافية</title>
 
   <!-- ===== ألوان / متغيرات جديدة مستوحاة من BlackDozer ===== -->
@@ -195,6 +197,22 @@
       transition:opacity .35s;z-index:4000;
     }
     #notification.show{opacity:1;pointer-events:auto}
+
+    /* ============================= */
+    /*      استجابة الهواتف          */
+    /* ============================= */
+    @media (max-width:600px){
+      header{flex-direction:column;gap:1rem;text-align:center;padding:1rem;}
+      .logo{font-size:1.6rem;}
+
+      section.services{padding:1.2rem;margin:1.5rem 1rem;}
+      .service{flex-direction:column;align-items:flex-start;gap:10px;}
+      .service button.add-btn{align-self:stretch;width:100%;}
+
+      #orderSection{margin:2rem 1rem;}
+
+      #cartDropdown{left:50%;transform:translateX(-50%);width:90vw;}
+    }
   </style>
 </head>
 <body>
@@ -251,7 +269,7 @@
 
     <!-- خدمة Lua -->
     <div class="service">
-      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.5 0 10-4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8z"/></svg>
+      <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 22c5.5 0 ১০ 4.5 10-10S17.5 2 12 2 2 6.5 2 12s4.5 10 10 10zM12 4c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8z"/></svg>
       <div class="details">
         <h2>برمجة Lua</h2>
         <p>تطوير سكربتات وألعاب Roblox</p>
@@ -289,7 +307,21 @@
   <footer>جميع الحقوق محفوظة &copy; 2025 NexoDev</footer>
 
   <!-- ================= سكربت ================= -->
+  <!-- EmailJS SDK لإرسال البريد مباشرةً -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
+    /*
+      ⚠️      قبل النشر        ⚠️
+      1️⃣ أنشئ حساباً مجانياً في https://www.emailjs.com/
+      2️⃣ أنشئ service و template من لوحة التحكم.
+      3️⃣ استبدل القيم التالية بالقيم الفعلية الخاصة بك:
+         - YOUR_PUBLIC_KEY
+         - YOUR_SERVICE_ID
+         - YOUR_TEMPLATE_ID
+      📧 هكذا يصلك الطلب مباشرة على xmondherxx@gmail.com بدون فتح عميل بريد.
+    */
+    emailjs.init("YOUR_PUBLIC_KEY");
+
     /* ---------- عناصر DOM ---------- */
     const cartIcon      = document.getElementById('cartIcon');
     const cartDropdown  = document.getElementById('cartDropdown');
@@ -396,7 +428,7 @@
     function showOrderSection(){orderSection.style.display='block';window.scrollTo({top:orderSection.offsetTop-60,behavior:'smooth'});}
     function hideOrderSection(){orderSection.style.display='none';orderForm.reset();}
 
-    /* إرسال الطلب بالبريد (mailto) */
+    /* إرسال الطلب بالبريد عبر EmailJS مع fallback إلى mailto */
     orderForm.onsubmit = e=>{
       e.preventDefault();
       const name  = orderForm.name.value.trim();
@@ -405,25 +437,34 @@
 
       if(!name||!email){alert('يرجى إدخال الاسم والبريد');return;}
 
-      const lines = cart.map(it=>`- ${it.name}: ${formatPrice(it.price)}`).join('%0D%0A');
+      const linesArray = cart.map(it=>`- ${it.name}: ${formatPrice(it.price)}`);
+      const linesPlain = linesArray.join('\n');
+      const linesEncoded = linesArray.join('%0D%0A');
       const total = formatPrice( calcTotal() );
-      const body  =
-`الاسم: ${name}
-البريد: ${email}
 
-الخدمات المطلوبة:
-${lines}
+      const templateParams = {
+        name,
+        email,
+        details: det || '---',
+        services: linesPlain,
+        total
+      };
 
-المجموع: ${total}
-
-تفاصيل إضافية:
-${det || '---'}
-`;
-      const mailto = `mailto:xmondherxx@gmail.com?subject=${encodeURIComponent('طلب جديد من NexoDev')}&body=${encodeURIComponent(body)}`;
-      window.open(mailto,'_blank');
-
-      showNotification('تم تجهيز بريد الطلب – يرجى الإرسال');
-      cart=[];updateCartCount();renderCart();hideOrderSection();
+      /* محاولة الإرسال التلقائي */
+      emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",templateParams)
+        .then(()=>{
+          showNotification('تم إرسال الطلب بنجاح، سنرد عليك قريبًا');
+          cart=[];updateCartCount();renderCart();hideOrderSection();
+        })
+        .catch(err=>{
+          console.error(err);
+          /* Fallback لفتح عميل البريد */
+          const body = `الاسم: ${name}%0D%0Aالبريد: ${email}%0D%0A%0D%0Aالخدمات المطلوبة:%0D%0A${linesEncoded}%0D%0A%0D%0Aالمجموع: ${total}%0D%0A%0D%0Aتفاصيل إضافية:%0D%0A${det || '---'}`;
+          const mailto = `mailto:xmondherxx@gmail.com?subject=${encodeURIComponent('طلب جديد من NexoDev')}&body=${body}`;
+          window.open(mailto,'_blank');
+          showNotification('تعذر الإرسال التلقائي - تم فتح بريدك لإرسال الطلب يدوياً');
+          cart=[];updateCartCount();renderCart();hideOrderSection();
+        });
     };
 
     /* إشعارات */
